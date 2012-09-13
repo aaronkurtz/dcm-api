@@ -16,7 +16,6 @@ def read_index_page(soup):
   home = soup.find('a',text='Home')
   data['name'] = home.find_next_sibling('a', href=re.compile('dlid')).string
   categories = home.find_next_siblings('a', href=re.compile('cid'))
-#TODO strip out urls with CIDs to save category data - list of tuple pairs (CID, Name)
   data['category'] = [category_strip(x) for x in categories]
   data['thumbnail'] = soup.find('img',src=re.compile('thumbnails'))['src']
   desc_header = soup.find(text='> Description')
