@@ -7,14 +7,19 @@ import re
 INDEX_URL = "http://digitalcomicmuseum.com/index.php?dlid="
 PREVIEW_URL = "http://digitalcomicmuseum.com/preview/index.php?did="
 
+def category_strip(link):
+  category = link['href'].rpartition('=')[2]
+  return (category, link.string)
+
 def read_index_page(soup):
   data = {}
-  links = soup.find_all('a')
-  data['publisher'] = links[10].string
-  data['series'] = links[11].string
-  data['issue'] = links[12].string
-  data['thumbnail'] = soup.find_all('img')[5]['src']
-  desc_header = soup.find(text='> Description') or False
+  home = soup.find('a',text='Home')
+  data['name'] = home.find_next_sibling('a', href=re.compile('dlid')).string
+  categories = home.find_next_siblings('a', href=re.compile('cid'))
+#TODO strip out urls with CIDs to save category data - list of tuple pairs (CID, Name)
+  data['category'] = [category_strip(x) for x in categories]
+  data['thumbnail'] = soup.find('img',src=re.compile('thumbnails'))['src']
+  desc_header = soup.find(text='> Description')
   if desc_header:
     data['description'] = '\n'.join(desc_header.find_next('tr',class_='mainrow').stripped_strings)
   else:
